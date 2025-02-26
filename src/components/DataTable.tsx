@@ -10,35 +10,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
-import { DataItemTable } from "@/pages";
-
+import { DataItemTable } from "@/types";
+import parseFileSize from "@/utils/parseFileSize";
 interface DataTableProps {
   data: DataItemTable[];
   setData: (data: DataItemTable[]) => void;
   visibleColumns: string[];
 }
 
-const parseFileSize = (size: string): number => {
-  const [value, unit] = size.split(" ");
-  const numericValue = Number.parseFloat(value);
-  switch (unit.toUpperCase()) {
-    case "KB":
-      return numericValue * 1024;
-    case "MB":
-      return numericValue * 1024 * 1024;
-    case "GB":
-      return numericValue * 1024 * 1024 * 1024;
-    default:
-      return numericValue;
-  }
-};
-
 export default function DataTable({
   data,
   setData,
   visibleColumns,
 }: DataTableProps) {
-  console.log("data", data, visibleColumns);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
