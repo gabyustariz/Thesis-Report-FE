@@ -1,34 +1,37 @@
-// Constants
-export const SCENE_OPEN = "open";
-export const SCENE_CLOSED = "closed";
-export const OBJ_OPAQUE = "opaque";
-export const OBJ_TRANSPARENT = "transparent";
+import {
+  categoryKeys,
+  metricsKeys,
+  modelMetricsKeys,
+  OBJ_COMPLEX,
+  OBJ_OPAQUE,
+  OBJ_TRANSPARENT,
+  preprocesingMetricsKeys,
+  SCENE_CLOSED,
+  SCENE_OPEN,
+} from "@/constants";
+
+export type Categories = {
+  [K in (typeof categoryKeys)[number]]?: string;
+};
 
 // Tag Types
 export type TagEsc = typeof SCENE_OPEN | typeof SCENE_CLOSED;
-export type TagObj = typeof OBJ_OPAQUE | typeof OBJ_TRANSPARENT;
+export type TagObj =
+  | typeof OBJ_OPAQUE
+  | typeof OBJ_TRANSPARENT
+  | typeof OBJ_COMPLEX;
 
-// Metrics Keys
-export const metricsKeys = [
-  "psnr",
-  "psnr_std",
-  "ssim",
-  "ssim_std",
-  "lpips",
-  "lpips_std",
-  "preprocesing_time_s",
-  "training_time_s",
-  "evaluation_time_s",
-  "num_rays_per_sec",
-  "num_rays_per_sec_std",
-  "fps",
-  "fps_std",
-  "frames_quantity",
-  "frame_size_total_bytes",
-  "frame_size_avg_bytes",
-] as const;
+export type SceneType = TagEsc | TagObj;
 
 // Metrics Type
+export type ModelMetrics = {
+  [K in (typeof modelMetricsKeys)[number]]?: number;
+};
+
+export type PreprocessorMetrics = {
+  [K in (typeof preprocesingMetricsKeys)[number]]?: number;
+};
+
 export type Metrics = {
   [K in (typeof metricsKeys)[number]]?: number;
 };
@@ -41,6 +44,7 @@ export type PreprocessorType = "COLMAP" | "HLOC";
 export type DataItem = Metrics & {
   id: number;
   title: string;
+  scene_type: string;
   dataset: string;
   type: FileType;
   model: ModelType;
@@ -54,6 +58,7 @@ export type DataItem = Metrics & {
 export type DataItemRequest = DataItem & {
   opaque_obj: boolean;
   transparent_obj: boolean;
+  complex_obj: boolean;
   open_scene: boolean;
   closed_scene: boolean;
   preprocessed: boolean;
@@ -72,4 +77,6 @@ export type DataItemTable = DataItem & {
 export type Request = {
   items: DataItemRequest[];
   total: number;
-}
+};
+export { metricsKeys };
+

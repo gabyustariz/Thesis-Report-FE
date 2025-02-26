@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
 import React from "react";
-import { DataItemTable, Metrics, metricsKeys } from "@/types";
-import parseFileSize from "@/utils/parseFileSize";
+import { DataItemTable, Metrics } from "@/types";
+import { metricsKeys } from "@/constants";
 
 interface GroupedViewProps {
   data: DataItemTable[];
@@ -98,13 +98,9 @@ export default function GroupedView({
       const result: Record<string, any> = { [groupBy]: key, items };
       aggregations.forEach((agg) => {
         let values: number[];
-        if (agg === "frame_size_avg_bytes") {
-          values = items.map((item) => parseFileSize((item as any)[agg]));
-        } else {
-          values = items
-            .map((item) => Number(item[agg as keyof DataItemTable]))
-            .filter((v) => !isNaN(v));
-        }
+        values = items
+          .map((item) => Number(item[agg as keyof DataItemTable]))
+          .filter((v) => !isNaN(v));
         result.avg = result.avg || {};
         result.min = result.min || {};
         result.max = result.max || {};
@@ -112,6 +108,7 @@ export default function GroupedView({
         result.min[agg] = Math.min(...values);
         result.max[agg] = Math.max(...values);
       });
+      console.log(result);
       return result;
     });
   }, [data, groupBy, aggregations]);
@@ -134,8 +131,8 @@ export default function GroupedView({
 
     return [...items].sort((a, b) => {
       if (sortColumn === "frame_size_avg_bytes") {
-        const sizeA = parseFileSize(String(a[sortColumn]));
-        const sizeB = parseFileSize(String(b[sortColumn]));
+        const sizeA = a[sortColumn] || 0;
+        const sizeB = b[sortColumn] || 0;
         return sortDirection === "asc" ? sizeA - sizeB : sizeB - sizeA;
       }
 

@@ -9,14 +9,22 @@ import { EXPERIMENT_URL } from "@/routes/routes";
 import { useQuery } from "react-query";
 import { fetchData } from "@/services/api";
 import {
-  metricsKeys,
   Request,
   TagEsc,
   TagObj,
   DataItemRequest,
   DataItemTable,
 } from "@/types/index";
-import { OBJECT_MAPPING, SCENE_MAPPING } from "@/constants";
+import {
+  categoryKeys,
+  metricsKeys,
+  modelMetricsKeys,
+  OBJECT_MAPPING,
+  preprocesingMetricsKeys,
+  SCENE_MAPPING,
+} from "@/constants";
+import CategoryMetricsTable from "@/components/MetricTable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fetchExperiments = async (): Promise<DataItemRequest[]> => {
   const data = await fetchData<Request>(EXPERIMENT_URL);
@@ -41,6 +49,7 @@ export default function Home() {
       const {
         opaque_obj,
         transparent_obj,
+        complex_obj,
         open_scene,
         closed_scene,
         preprocessed,
@@ -88,38 +97,76 @@ export default function Home() {
   if (!data.length) return <div>Error: No data</div>;
 
   return (
-    <main className="container mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold">Data Analysis App</h1>
-      <div className="space-y-4">
-        <ControlPanel
-          fields={Object.keys(data[0])}
-          metrics={metricsKeys}
-          onGroupByChange={setGroupBy}
-          onAggregationsChange={handleAggregationsChange}
-          aggregations={aggregations}
-        />
-        <ColumnSelector
-          columns={Object.keys(data[0])}
-          visibleColumns={visibleColumns}
-          onColumnChange={handleColumnChange}
-        />
-      </div>
-      <div className="bg-white rounded-lg shadow-md p-4">
-        {groupBy ? (
-          <GroupedView
-            data={data}
-            groupBy={groupBy}
-            aggregations={aggregations}
-            visibleColumns={visibleColumns}
-          />
-        ) : (
-          <DataTable
-            data={data}
-            setData={setData}
-            visibleColumns={visibleColumns}
-          />
-        )}
-      </div>
-    </main>
+    <>
+      <main className="container mx-auto p-4 py-10 space-y-6">
+        <h1 className="text-2xl font-bold">Aplicación de Análisis</h1>
+        <Tabs defaultValue="main-view" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 gap-2">
+            <TabsTrigger value="main-view">Tabla principal</TabsTrigger>
+            <TabsTrigger value="preprocessor-metrics">
+              Tabla de Métricas de Preprocesadores
+            </TabsTrigger>
+            <TabsTrigger value="model-metrics">
+              Tabla de Métricas de Modelos de IA
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="main-view">
+            <div className="space-y-4">
+              <ControlPanel
+                fields={Object.keys(data[0])}
+                metrics={metricsKeys}
+                onGroupByChange={setGroupBy}
+                onAggregationsChange={handleAggregationsChange}
+                aggregations={aggregations}
+              />
+              <ColumnSelector
+                columns={Object.keys(data[0])}
+                visibleColumns={visibleColumns}
+                onColumnChange={handleColumnChange}
+              />
+            </div>
+            <h2 className="text-xl font-semibold mb-4 pt-8">Tabla Principal</h2>
+            <div className="bg-white rounded-lg shadow-md p-4 mt-4">
+              {groupBy ? (
+                <GroupedView
+                  data={data}
+                  groupBy={groupBy}
+                  aggregations={aggregations}
+                  visibleColumns={visibleColumns}
+                />
+              ) : (
+                <DataTable
+                  data={data}
+                  setData={setData}
+                  visibleColumns={visibleColumns}
+                />
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="preprocessor-metrics">
+            <h2 className="text-xl font-semibold mb-4">
+              Tabla de Métricas de Preprocesadores
+            </h2>
+            <CategoryMetricsTable
+              data={items || []}
+              metrics={[...preprocesingMetricsKeys]}
+              categories={[...categoryKeys]}
+              mainFilter="preprocessor"
+            />
+          </TabsContent>
+          <TabsContent value="model-metrics">
+            <h2 className="text-xl font-semibold mb-4">
+              Tabla de Métricas de Modelos de IA
+            </h2>
+            <CategoryMetricsTable
+              data={items || []}
+              metrics={[...modelMetricsKeys]}
+              categories={[...categoryKeys]}
+              mainFilter="model"
+            />
+          </TabsContent>
+        </Tabs>
+      </main>
+    </>
   );
 }
