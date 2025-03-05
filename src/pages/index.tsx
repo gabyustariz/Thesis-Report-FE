@@ -1,10 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DataTable from "@/components/DataTable";
-import GroupedView from "@/components/GroupedView";
-import ControlPanel from "@/components/ControlPanel";
-import ColumnSelector from "@/components/ColumnSelector";
 import { EXPERIMENT_URL } from "@/routes/routes";
 import { useQuery } from "react-query";
 import { fetchData } from "@/services/api";
@@ -16,15 +12,17 @@ import {
   DataItemTable,
 } from "@/types/index";
 import {
-  categoryKeys,
+  METRIC_TABLES,
   metricsKeys,
-  modelMetricsKeys,
   OBJECT_MAPPING,
-  preprocesingMetricsKeys,
   SCENE_MAPPING,
 } from "@/constants";
 import CategoryMetricsTable from "@/components/MetricTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BaseTable from "@/components/BaseTable";
+import { Loader2Icon, LoaderIcon } from "lucide-react";
+import noDataFound from "@/assets/images/nodata.png";
+import Image from "next/image";
 
 const fetchExperiments = async (): Promise<DataItemRequest[]> => {
   const data = await fetchData<Request>(EXPERIMENT_URL);
@@ -92,9 +90,26 @@ export default function Home() {
     );
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!data.length) return <div>Error: No data</div>;
+  if (isLoading || !data.length || error) {
+    const message = error ? `Error: ${error.message}` : "Sin data";
+    return (
+      <div className="flex justify-center items-center h-screen text-neutral-600">
+        {isLoading ? (
+          <Loader2Icon className="animate-spin h-14 w-14"></Loader2Icon>
+        ) : (
+          <div className="flex flex-col items-center space-y-4">
+            <Image
+              width={600}
+              height={400}
+              src={noDataFound.src}
+              alt="No data found"
+            />
+            <span className="mt-[-10rem]">{message}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -111,60 +126,28 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="main-view">
-            <div className="space-y-4">
-              <ControlPanel
-                fields={Object.keys(data[0])}
-                metrics={metricsKeys}
-                onGroupByChange={setGroupBy}
-                onAggregationsChange={handleAggregationsChange}
-                aggregations={aggregations}
-              />
-              <ColumnSelector
-                columns={Object.keys(data[0])}
-                visibleColumns={visibleColumns}
-                onColumnChange={handleColumnChange}
-              />
-            </div>
-            <h2 className="text-xl font-semibold mb-4 pt-8">Tabla Principal</h2>
-            <div className="bg-white rounded-lg shadow-md p-4 mt-4">
-              {groupBy ? (
-                <GroupedView
-                  data={data}
-                  groupBy={groupBy}
-                  aggregations={aggregations}
-                  visibleColumns={visibleColumns}
-                />
-              ) : (
-                <DataTable
-                  data={data}
-                  setData={setData}
-                  visibleColumns={visibleColumns}
-                />
-              )}
-            </div>
-          </TabsContent>
-          <TabsContent value="preprocessor-metrics">
-            <h2 className="text-xl font-semibold mb-4">
-              Tabla de Métricas de Preprocesadores
-            </h2>
-            <CategoryMetricsTable
-              data={items || []}
-              metrics={[...preprocesingMetricsKeys]}
-              categories={[...categoryKeys]}
-              mainFilter="preprocessor"
+            <BaseTable
+              data={data}
+              setData={setData}
+              visibleColumns={visibleColumns}
+              aggregations={aggregations}
+              handleAggregationsChange={handleAggregationsChange}
+              handleColumnChange={handleColumnChange}
+              groupBy={groupBy}
+              setGroupBy={setGroupBy}
             />
           </TabsContent>
-          <TabsContent value="model-metrics">
-            <h2 className="text-xl font-semibold mb-4">
-              Tabla de Métricas de Modelos de IA
-            </h2>
-            <CategoryMetricsTable
-              data={items || []}
-              metrics={[...modelMetricsKeys]}
-              categories={[...categoryKeys]}
-              mainFilter="model"
-            />
-          </TabsContent>
+          {METRIC_TABLES.map(({ key, label, metrics, categoryKeys }) => (
+            <TabsContent value={key} key={key}>
+              <h2 className="text-xl font-semibold mb-4">{label}</h2>
+              <CategoryMetricsTable
+                data={items || []}
+                metrics={metrics}
+                categories={categoryKeys}
+                mainFilter="preprocessor"
+              />
+            </TabsContent>
+          ))}
         </Tabs>
       </main>
     </>

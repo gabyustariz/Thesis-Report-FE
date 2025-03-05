@@ -49,22 +49,6 @@ export default function CategoryMetricsTable({
     return data.filter((item) => item[category]).length;
   };
 
-  //   const newData = useMemo(() => {
-  //     return models.map((model) => ({
-  //       model,
-  //       metricsData: metrics.map((metric) => ({
-  //         metric,
-  //         categoriesData: categories.map((category) => {
-  //           const average = calculateAverage(model, category, metric);
-  //           return {
-  //             category,
-  //             average,
-  //           };
-  //         }),
-  //       })),
-  //     }));
-  //   }, [data, metrics, categories, mainFilter, models]);
-
   const dataTable: {
     [key: string]: {
       [key: string]: {

@@ -115,3 +115,18 @@ export const TABLE_MAPPING = {
   tag_obj: "Tags de objetos",
   tag_esc: "Tags de escenas",
 };
+
+export const METRIC_TABLES = [
+  {
+    key: "model-metrics",
+    label: "Tabla de Métricas de Modelos",
+    metrics: [...modelMetricsKeys],
+    categoryKeys: [...categoryKeys],
+  },
+  {
+    key: "preprocessor-metrics",
+    label: "Tabla de Métricas de Preprocesadores",
+    metrics: [...preprocesingMetricsKeys],
+    categoryKeys: [...categoryKeys],
+  },
+];
