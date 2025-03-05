@@ -6,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MultiSelect } from "./MultiSelect";
-import { metricsKeys } from "@/pages";
+import { metricsKeys } from "@/types";
 
 interface ControlPanelProps {
   fields: string[];
@@ -23,8 +23,6 @@ export default function ControlPanel({
   onAggregationsChange,
   aggregations,
 }: ControlPanelProps) {
-
-  console.log("metrics", metrics);
   return (
     <div className="flex flex-wrap gap-4 mb-4 items-center">
       <div className="flex-1 min-w-[180px]">

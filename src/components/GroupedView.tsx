@@ -12,31 +12,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
-import type { DataItem, DataItemTable, metricsKeys } from "../pages/index";
 import React from "react";
+import { DataItemTable, Metrics } from "@/types";
+import { metricsKeys } from "@/constants";
 
 interface GroupedViewProps {
-  data: DataItem[];
+  data: DataItemTable[];
   groupBy: string;
   aggregations: typeof metricsKeys;
   visibleColumns: string[];
 }
-
-const parseFileSize = (size: string): number => {
-  console.log("size", size);
-  const [value, unit] = size.split(" ");
-  const numericValue = Number.parseFloat(value);
-  switch (unit.toUpperCase()) {
-    case "KB":
-      return numericValue * 1024;
-    case "MB":
-      return numericValue * 1024 * 1024;
-    case "GB":
-      return numericValue * 1024 * 1024 * 1024;
-    default:
-      return numericValue;
-  }
-};
 
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes.toFixed(2)} B`;
@@ -78,40 +63,44 @@ export default function GroupedView({
   );
 
   const groupedData = useMemo(() => {
-    let groups: Record<string, DataItem[]> = {};
+    let groups: Record<string, DataItemTable[]> = {};
 
     if (groupBy === "tag_obj" || groupBy === "tag_esc") {
-      const allTags = new Set(data.flatMap((item) => item[groupBy as keyof DataItem]));
+      const allTags = new Set(
+        data.flatMap((item) => item[groupBy as keyof DataItemTable])
+      );
       allTags.forEach((tag) => {
         groups[tag as string] = data.filter((item) => {
-          const groupValue = item[groupBy as keyof DataItem];
-          return groupValue && Array.isArray(groupValue) && groupValue.includes(tag);
+          const groupValue = item[groupBy as keyof DataItemTable];
+          return (
+            groupValue &&
+            Array.isArray(groupValue) &&
+            (groupValue as string[]).includes(tag as string)
+          );
         });
       });
     } else {
       groups = data.reduce((acc, item) => {
-        const key = Array.isArray(item[groupBy as keyof DataItem] as any)
-          ? (item[groupBy as keyof DataItem] as string[] | undefined)?.join(", ") ?? ""
-          : String(item[groupBy as keyof DataItem]);
+        const key = Array.isArray(item[groupBy as keyof DataItemTable] as any)
+          ? (
+              item[groupBy as keyof DataItemTable] as string[] | undefined
+            )?.join(", ") ?? ""
+          : String(item[groupBy as keyof DataItemTable]);
         if (!acc[key]) {
           acc[key] = [];
         }
         acc[key].push(item);
         return acc;
-      }, {} as Record<string, DataItem[]>);
+      }, {} as Record<string, DataItemTable[]>);
     }
 
     return Object.entries(groups).map(([key, items]) => {
       const result: Record<string, any> = { [groupBy]: key, items };
       aggregations.forEach((agg) => {
         let values: number[];
-        if (agg === "frame_size_avg_bytes") {
-          values = items.map((item) => parseFileSize((item as any)[agg]));
-        } else {
-          values = items
-            .map((item) => Number(item[agg]))
-            .filter((v) => !isNaN(v));
-        }
+        values = items
+          .map((item) => Number(item[agg as keyof DataItemTable]))
+          .filter((v) => !isNaN(v));
         result.avg = result.avg || {};
         result.min = result.min || {};
         result.max = result.max || {};
@@ -119,6 +108,7 @@ export default function GroupedView({
         result.min[agg] = Math.min(...values);
         result.max[agg] = Math.max(...values);
       });
+      console.log(result);
       return result;
     });
   }, [data, groupBy, aggregations]);
@@ -136,19 +126,25 @@ export default function GroupedView({
     }
   };
 
-  const sortItems = (items: DataItem[]) => {
+  const sortItems = (items: DataItemTable[]) => {
     if (!sortColumn) return items;
 
     return [...items].sort((a, b) => {
       if (sortColumn === "frame_size_avg_bytes") {
-        const sizeA = parseFileSize(String(a[sortColumn]));
-        const sizeB = parseFileSize(String(b[sortColumn]));
+        const sizeA = a[sortColumn] || 0;
+        const sizeB = b[sortColumn] || 0;
         return sortDirection === "asc" ? sizeA - sizeB : sizeB - sizeA;
       }
 
-      if ((a[sortColumn as keyof DataItem] ?? 0) < (b[sortColumn as keyof DataItem] ?? 0))
+      if (
+        (a[sortColumn as keyof DataItemTable] ?? 0) <
+        (b[sortColumn as keyof DataItemTable] ?? 0)
+      )
         return sortDirection === "asc" ? -1 : 1;
-      if ((a[sortColumn as keyof DataItem] ?? 0) > (b[sortColumn as keyof DataItem] ?? 0))
+      if (
+        (a[sortColumn as keyof DataItemTable] ?? 0) >
+        (b[sortColumn as keyof DataItemTable] ?? 0)
+      )
         return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
@@ -220,7 +216,7 @@ export default function GroupedView({
                 </TableCell>
                 {columns.map((col) => (
                   <TableCell key={col} className="text-center">
-                    {aggregations.includes(col) ? (
+                    {aggregations.includes(col as keyof Metrics) ? (
                       <span
                         title={`Min: ${formatValue(
                           group.min[col],
@@ -240,7 +236,9 @@ export default function GroupedView({
                       <span
                         title={`Min: ${formatFileSize(
                           group.min["frame_size_avg_bytes"]
-                        )}, Max: ${formatFileSize(group.max["frame_size_avg_bytes"])}`}
+                        )}, Max: ${formatFileSize(
+                          group.max["frame_size_avg_bytes"]
+                        )}`}
                       >
                         {formatFileSize(group.avg["frame_size_avg_bytes"])}
                       </span>
@@ -253,7 +251,7 @@ export default function GroupedView({
               {expandedGroups[group[groupBy]] && (
                 <>
                   {sortItems(group.items).map(
-                    (item: DataItem, itemIndex: number) => (
+                    (item: DataItemTable, itemIndex: number) => (
                       <TableRow
                         key={`${groupIndex}-${itemIndex}`}
                         className="hover:bg-muted/30"
@@ -261,7 +259,7 @@ export default function GroupedView({
                         <TableCell className="pl-10">-</TableCell>
                         {columns.map((col) => (
                           <TableCell key={col} className="text-center">
-                            {formatValue(item[col], col)}
+                            {formatValue(item[col as keyof DataItemTable], col)}
                           </TableCell>
                         ))}
                         {visibleColumns.includes("frame_size_avg_bytes") && (

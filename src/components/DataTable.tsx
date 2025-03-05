@@ -10,35 +10,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown } from "lucide-react";
-import { DataItemTable } from "@/pages";
-
+import { DataItemTable } from "@/types";
+import { formatFileSize } from "@/utils/fileFormatter";
+import { formatDate, formatDuration } from "@/utils/timeFormatter";
+import { TABLE_MAPPING } from "@/constants";
 interface DataTableProps {
   data: DataItemTable[];
   setData: (data: DataItemTable[]) => void;
   visibleColumns: string[];
 }
 
-const parseFileSize = (size: string): number => {
-  const [value, unit] = size.split(" ");
-  const numericValue = Number.parseFloat(value);
-  switch (unit.toUpperCase()) {
-    case "KB":
-      return numericValue * 1024;
-    case "MB":
-      return numericValue * 1024 * 1024;
-    case "GB":
-      return numericValue * 1024 * 1024 * 1024;
-    default:
-      return numericValue;
-  }
-};
-
 export default function DataTable({
   data,
   setData,
   visibleColumns,
 }: DataTableProps) {
-  console.log("data", data, visibleColumns);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -52,8 +38,8 @@ export default function DataTable({
 
     const sortedData = [...data].sort((a, b) => {
       if (column === "frame_size_total_bytes") {
-        const sizeA = parseFileSize(String(a[column]));
-        const sizeB = parseFileSize(String(b[column]));
+        const sizeA = a[column] || 0;
+        const sizeB = b[column] || 0;
         return sortDirection === "asc" ? sizeA - sizeB : sizeB - sizeA;
       }
 
@@ -75,26 +61,42 @@ export default function DataTable({
     setData(sortedData);
   };
 
-  const renderCellContent = (item: DataItemTable, column: keyof DataItemTable): React.ReactNode => {
+  const renderCellContent = (
+    item: DataItemTable,
+    column: keyof DataItemTable
+  ): React.ReactNode => {
     if (column === "tag_obj" || column === "tag_esc") {
       return (
         <div className="flex flex-wrap gap-1">
           {item[column].map((tag: string, index: number) => (
             <Badge key={index} variant="secondary">
-              {tag}
+              {TABLE_MAPPING[tag as keyof typeof TABLE_MAPPING]}
             </Badge>
           ))}
         </div>
       );
     }
-    // if (column === "virtual_scene" || column === "real_scene") {
-    //   return item[column] ? "Yes" : "No";
-    // }
-    if (column === "frames_quantity") {
+    if (column === "virtual_scene" || column === "real_scene") {
+      return item[column] ? "Sí" : "No";
+    }
+    if (
+      column === "frame_size_avg_bytes" ||
+      column === "frame_size_total_bytes"
+    ) {
+      return formatFileSize(item[column] || 0);
+    }
+    if (column === "frames_training_total") {
       return item[column] !== undefined ? Math.round(item[column]) : 0;
     }
-    if (item[column] instanceof Date) {
-      return (item[column] as Date).toLocaleDateString();
+    if (
+      column === "preprocesing_time_s" ||
+      column === "training_time_s" ||
+      column === "evaluation_time_s"
+    ) {
+      return formatDuration(item[column] || 0);
+    }
+    if (column === "date_added" || column === "date_updated") {
+      return formatDate(String(item[column]));
     }
     return String(item[column]);
   };
@@ -105,8 +107,12 @@ export default function DataTable({
         <TableRow>
           {visibleColumns.map((column) => (
             <TableHead key={column}>
-              <Button variant="ghost" onClick={() => handleSort(column)}>
-                {column}
+              <Button
+                variant="ghost"
+                onClick={() => handleSort(column)}
+                className="pl-0"
+              >
+                {TABLE_MAPPING[column as keyof typeof TABLE_MAPPING]}
                 {sortColumn === column && (
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 )}
@@ -119,7 +125,7 @@ export default function DataTable({
         {data.map((item, index) => (
           <TableRow key={index}>
             {visibleColumns.map((column) => (
-              <TableCell key={column}>
+              <TableCell key={column} className="py-4">
                 {renderCellContent(item, column as keyof DataItemTable)}
               </TableCell>
             ))}
