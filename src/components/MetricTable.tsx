@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Categories, DataItemRequest, Metrics } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CATEGORY_MAPPING } from "@/constants";
+import { CATEGORY_MAPPING, TABLE_MAPPING } from "@/constants";
 import MetricBarChart from "./MetricBarChart";
 import MetricLineChart from "./MetricLineChart";
 
@@ -50,11 +50,9 @@ export default function CategoryMetricsTable({
   };
 
   const dataTable: {
-    [key: string]: {
-      [key: string]: {
-        [key: string]: {
-          [key: string]: string;
-        };
+    [mainFilter: string]: {
+      [metric: string]: {
+        [category: string]: string;
       };
     };
   } = useMemo(() => {
@@ -71,7 +69,7 @@ export default function CategoryMetricsTable({
       }, {});
       return {
         ...acc,
-        [model]: metricsDa,
+        [mainFilter]: metricsDa,
       };
     }, {});
   }, [data, metrics, categories, mainFilter, models]);
@@ -82,8 +80,8 @@ export default function CategoryMetricsTable({
     return metrics.reduce((acc, metric) => {
       const categoryData = categories.map((category) => {
         const models = Object.entries(dataTable).reduce(
-          (acc: { [key: string]: any }, [model, value]) => {
-            acc[model] = dataTable[model][metric][category];
+          (acc: { [key: string]: any }, [mainFilter, value]) => {
+            acc[mainFilter] = dataTable[mainFilter][metric][category];
             return acc;
           },
           {}
@@ -119,16 +117,18 @@ export default function CategoryMetricsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Object.entries(dataTable).map(([model, metricas]) => (
+            {Object.entries(dataTable).map(([model, newMetrics]) => (
               <React.Fragment key={model}>
                 {Object.entries(
-                  metricas as { [key: string]: { [key: string]: string } }
+                  newMetrics as { [key: string]: { [key: string]: string } }
                 ).map(([metric, categories], index) => (
                   <TableRow key={`${model}-${metric}`}>
                     {index === 0 && (
                       <TableCell rowSpan={metrics.length}>{model}</TableCell>
                     )}
-                    <TableCell>{metric}</TableCell>
+                    <TableCell>
+                      {TABLE_MAPPING[metric as keyof typeof TABLE_MAPPING]}
+                    </TableCell>
                     {Object.entries(categories).map(([category, average]) => (
                       <TableCell
                         key={`${model}-${metric}-${category}`}
@@ -154,7 +154,7 @@ export default function CategoryMetricsTable({
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
             {metrics.map((metric) => (
               <TabsTrigger key={metric} value={metric}>
-                {metric.replace("_", " ").toUpperCase()}
+                {TABLE_MAPPING[metric]}
               </TabsTrigger>
             ))}
           </TabsList>
