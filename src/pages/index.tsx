@@ -118,10 +118,10 @@ export default function Home() {
         <Tabs defaultValue="main-view" className="w-full">
           <TabsList className="grid w-full grid-cols-3 gap-2">
             <TabsTrigger value="main-view">Tabla principal</TabsTrigger>
-            <TabsTrigger value="preprocessor-metrics">
+            <TabsTrigger value="preprocessor">
               Tabla de Métricas de Preprocesadores
             </TabsTrigger>
-            <TabsTrigger value="model-metrics">
+            <TabsTrigger value="model">
               Tabla de Métricas de Modelos de IA
             </TabsTrigger>
           </TabsList>
@@ -137,14 +137,14 @@ export default function Home() {
               setGroupBy={setGroupBy}
             />
           </TabsContent>
-          {METRIC_TABLES.map(({ key, label, metrics, categoryKeys }) => (
+          {METRIC_TABLES.filter(({ key }) => key === "model" || key === "preprocessor").map(({ key, label, metrics, categoryKeys }) => (
             <TabsContent value={key} key={key}>
               <h2 className="text-xl font-semibold mb-4">{label}</h2>
               <CategoryMetricsTable
                 data={items || []}
                 metrics={metrics}
                 categories={categoryKeys}
-                mainFilter="preprocessor"
+                mainFilter={key as "model" | "preprocessor"}
               />
             </TabsContent>
           ))}

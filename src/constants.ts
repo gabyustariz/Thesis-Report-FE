@@ -118,13 +118,13 @@ export const TABLE_MAPPING = {
 
 export const METRIC_TABLES = [
   {
-    key: "model-metrics",
+    key: "model",
     label: "Tabla de Métricas de Modelos",
     metrics: [...modelMetricsKeys],
     categoryKeys: [...categoryKeys],
   },
   {
-    key: "preprocessor-metrics",
+    key: "preprocessor",
     label: "Tabla de Métricas de Preprocesadores",
     metrics: [...preprocesingMetricsKeys],
     categoryKeys: [...categoryKeys],

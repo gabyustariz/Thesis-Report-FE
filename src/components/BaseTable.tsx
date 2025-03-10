@@ -3,7 +3,6 @@
 import DataTable from "@/components/DataTable";
 import GroupedView from "@/components/GroupedView";
 import ControlPanel from "@/components/ControlPanel";
-import ColumnSelector from "@/components/ColumnSelector";
 import { DataItemTable } from "@/types/index";
 import { metricsKeys, TABLE_MAPPING } from "@/constants";
 
@@ -32,16 +31,14 @@ export default function BaseTable({
     <>
       <div className="space-y-4">
         <ControlPanel
-          fields={Object.keys(TABLE_MAPPING)}
+          fields={Object.keys(TABLE_MAPPING) as (keyof typeof TABLE_MAPPING)[]}
           metrics={metricsKeys}
           onGroupByChange={setGroupBy}
           onAggregationsChange={handleAggregationsChange}
           aggregations={aggregations}
-        />
-        <ColumnSelector
-          columns={Object.keys(TABLE_MAPPING)}
+          groupBy={groupBy}
           visibleColumns={visibleColumns}
-          onColumnChange={handleColumnChange}
+          handleColumnChange={handleColumnChange}
         />
       </div>
       <h2 className="text-xl font-semibold mb-4 pt-8">Tabla Principal</h2>

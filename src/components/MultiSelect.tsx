@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { TABLE_MAPPING } from "@/constants";
 
 interface MultiSelectProps {
   options: string[];
@@ -43,15 +44,15 @@ export function MultiSelect({
           aria-expanded={open}
           className="w-[280px] justify-between"
         >
-          {selected.length > 0 ? `${selected.length} selected` : placeholder}
+          {selected.length > 0 ? `${selected.length} seleccionado(s)` : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[280px] p-0">
         <Command>
-          <CommandInput placeholder="Search..." />
+          <CommandInput placeholder="Buscar..." />
           <CommandList>
-            <CommandEmpty>No item found.</CommandEmpty>
+            <CommandEmpty>Ninguna instancia encontrada</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
@@ -71,7 +72,7 @@ export function MultiSelect({
                       selected.includes(option) ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {option}
+                  {TABLE_MAPPING[option as keyof typeof TABLE_MAPPING]}
                 </CommandItem>
               ))}
             </CommandGroup>

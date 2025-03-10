@@ -28,6 +28,8 @@ export default function CategoryMetricsTable({
 }: CategoryMetricsTableProps) {
   const [activeMetric, setActiveMetric] = useState(metrics[0]);
 
+  console.log(`ke`, data);
+
   const models = Array.from(new Set(data.map((item) => item[mainFilter])));
   const calculateAverage = (
     model: string,
@@ -69,7 +71,7 @@ export default function CategoryMetricsTable({
       }, {});
       return {
         ...acc,
-        [mainFilter]: metricsDa,
+        [model]: metricsDa,
       };
     }, {});
   }, [data, metrics, categories, mainFilter, models]);
@@ -81,13 +83,14 @@ export default function CategoryMetricsTable({
       const categoryData = categories.map((category) => {
         const models = Object.entries(dataTable).reduce(
           (acc: { [key: string]: any }, [mainFilter, value]) => {
+            console.log(`epale2`, dataTable, value);
             acc[mainFilter] = dataTable[mainFilter][metric][category];
             return acc;
           },
           {}
         );
         return {
-          name: category,
+          name: TABLE_MAPPING[category],
           ...models,
         };
       });
@@ -98,6 +101,8 @@ export default function CategoryMetricsTable({
     }, {});
   }, [dataTable]);
 
+  console.log(dataChart);
+
   return (
     <>
       <div className="bg-white rounded-lg shadow-md p-4 mt-4 overflow-x-auto">
@@ -105,9 +110,9 @@ export default function CategoryMetricsTable({
           <TableHeader>
             <TableRow>
               <TableHead rowSpan={2} className="capitalize">
-                {mainFilter}
+                {TABLE_MAPPING[mainFilter]}
               </TableHead>
-              <TableHead rowSpan={2}>Metric</TableHead>
+              <TableHead rowSpan={2}>Métrica</TableHead>
               {categories.map((category) => (
                 <TableHead key={category} colSpan={1} className="text-center">
                   {CATEGORY_MAPPING[category].label}
@@ -164,13 +169,13 @@ export default function CategoryMetricsTable({
               <div>
                 <h3 className="text-lg font-medium mb-4">Bar Chart</h3>
                 <div className="h-[400px]">
-                  <MetricBarChart data={dataChart[metric]} />
+                  <MetricBarChart data={dataChart[metric]} models={models} />
                 </div>
               </div>
               <div>
                 <h3 className="text-lg font-medium mb-4">Line Chart</h3>
                 <div className="h-[400px]">
-                  <MetricLineChart data={dataChart[metric]} />
+                  <MetricLineChart data={dataChart[metric]} models={models} />
                 </div>
               </div>
             </TabsContent>

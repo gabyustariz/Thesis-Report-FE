@@ -14,9 +14,10 @@ import {
 
 interface MetricBarChartProps {
   data: { name: string; [key: string]: string }[];
+  models: string[];
 }
 
-export default function MetricBarChart({ data }: MetricBarChartProps) {
+export default function MetricBarChart({ data, models }: MetricBarChartProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart
@@ -32,18 +33,15 @@ export default function MetricBarChart({ data }: MetricBarChartProps) {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar
-          dataKey="NeRF"
-          name="NeRF"
-          fill="hsl(var(--chart-1))"
-          radius={[4, 4, 0, 0]}
-        />
-        <Bar
-          dataKey="Gaussian"
-          name="Gaussian"
-          fill="hsl(var(--chart-2))"
-          radius={[4, 4, 0, 0]}
-        />
+        {models. map((model, index) => (
+          <Bar
+            key={index}
+            dataKey={model}
+            name={model}
+            fill={`hsl(var(--chart-${index + 1}))`}
+            radius={[4, 4, 0, 0]}
+          />
+        ))}
       </BarChart>
     </ResponsiveContainer>
   );

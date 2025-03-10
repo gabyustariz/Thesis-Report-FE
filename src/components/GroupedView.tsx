@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
 import React from "react";
 import { DataItemTable, Metrics } from "@/types";
-import { metricsKeys } from "@/constants";
+import { metricsKeys, TABLE_MAPPING } from "@/constants";
 
 interface GroupedViewProps {
   data: DataItemTable[];
@@ -159,7 +159,9 @@ export default function GroupedView({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted">
-            <TableHead className="w-[200px]">{groupBy}</TableHead>
+            <TableHead className="w-[200px]">
+              {TABLE_MAPPING[groupBy as keyof typeof TABLE_MAPPING]}
+            </TableHead>
             {columns.map((col) => (
               <TableHead key={col} className="px-2 py-3 text-center">
                 <Button
@@ -167,7 +169,9 @@ export default function GroupedView({
                   onClick={() => handleSort(col)}
                   className="h-full w-full flex items-center justify-center"
                 >
-                  <span className="mr-1">{col}</span>
+                  <span className="mr-1">
+                    {TABLE_MAPPING[col as keyof typeof TABLE_MAPPING]}
+                  </span>
                   {sortColumn === col && <ArrowUpDown className="h-4 w-4" />}
                 </Button>
               </TableHead>

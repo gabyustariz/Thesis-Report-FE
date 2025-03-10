@@ -13,9 +13,10 @@ import {
 
 interface MetricLineChartProps {
   data: { name: string; [key: string]: string }[];
+  models: string[];
 }
 
-export default function MetricLineChart({ data }: MetricLineChartProps) {
+export default function MetricLineChart({ data, models }: MetricLineChartProps) {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
@@ -27,24 +28,18 @@ export default function MetricLineChart({ data }: MetricLineChartProps) {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line
-          type="monotone"
-          dataKey="NeRF"
-          name="NeRF"
-          stroke="hsl(var(--chart-1))"
-          strokeWidth={2}
-          connectNulls={true}
-          activeDot={{ r: 8 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="Gaussian"
-          name="Gaussian"
-          stroke="hsl(var(--chart-2))"
-          strokeWidth={2}
-          connectNulls={true}
-          activeDot={{ r: 8 }}
-        />
+        {models.map((model, index) => (
+          <Line
+            key={index}
+            type="monotone"
+            dataKey={model}
+            name={model}
+            stroke={`hsl(var(--chart-${index + 1}))`}
+            strokeWidth={2}
+            connectNulls={true}
+            activeDot={{ r: 8 }}
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );
