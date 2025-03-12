@@ -90,8 +90,8 @@ export const METRIC_MAPPING = {
   fps_std: "FPS std",
   frames_total: "Frames totales",
   frames_training_total: "Frames de entrenamiento",
-  frame_size_total_bytes: "Tamaño total de frames (Bytes)",
-  frame_size_avg_bytes: "Tamaño promedio de frames (Bytes)",
+  frame_size_total_bytes: "Tamaño total de frames (B)",
+  frame_size_avg_bytes: "Tamaño promedio de frames (B)",
 };
 
 export const TABLE_MAPPING = {

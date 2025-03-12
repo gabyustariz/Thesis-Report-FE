@@ -23,53 +23,20 @@ import BaseTable from "@/components/BaseTable";
 import { Loader2Icon, LoaderIcon } from "lucide-react";
 import noDataFound from "@/assets/images/nodata.png";
 import Image from "next/image";
-
-const fetchExperiments = async (): Promise<DataItemRequest[]> => {
-  const data = await fetchData<Request>(EXPERIMENT_URL);
-  return data.items;
-};
+import useGetExperiments from "@/hooks/useGetExperiments";
+import getFormattedItems from "@/utils/initialFormatter";
 
 export default function Home() {
   const [data, setData] = useState<DataItemTable[]>([]);
   const [groupBy, setGroupBy] = useState<string | null>(null);
-  const {
-    data: items,
-    error,
-    isLoading,
-  } = useQuery<DataItemRequest[], Error>("experiments", fetchExperiments);
+  const { data: items, error, isLoading } = useGetExperiments();
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
   const [aggregations, setAggregations] =
     useState<typeof metricsKeys>(metricsKeys);
 
   useEffect(() => {
     if (!items || !items.length) return;
-    const newItems = items.map((item) => {
-      const {
-        opaque_obj,
-        transparent_obj,
-        complex_obj,
-        open_scene,
-        closed_scene,
-        preprocessed,
-        trained,
-        evaluated,
-        successful,
-        error,
-        raw_data,
-        ...rest
-      } = item;
-      const tag_objs = Object.keys(OBJECT_MAPPING).filter(
-        (i) => item[i as keyof DataItemRequest]
-      ) as TagObj[];
-      const tag_escs = Object.keys(SCENE_MAPPING).filter(
-        (i) => item[i as keyof DataItemRequest]
-      ) as TagEsc[];
-      return {
-        ...rest,
-        tag_obj: tag_objs,
-        tag_esc: tag_escs,
-      };
-    });
+    const newItems = getFormattedItems(items);
     setData(newItems as DataItemTable[]);
     setVisibleColumns(Object.keys(newItems[0]));
   }, [items]);
@@ -137,7 +104,9 @@ export default function Home() {
               setGroupBy={setGroupBy}
             />
           </TabsContent>
-          {METRIC_TABLES.filter(({ key }) => key === "model" || key === "preprocessor").map(({ key, label, metrics, categoryKeys }) => (
+          {METRIC_TABLES.filter(
+            ({ key }) => key === "model" || key === "preprocessor"
+          ).map(({ key, label, metrics, categoryKeys }) => (
             <TabsContent value={key} key={key}>
               <h2 className="text-xl font-semibold mb-4">{label}</h2>
               <CategoryMetricsTable

@@ -61,12 +61,12 @@ export type DataItemRequest = DataItem & {
   complex_obj: boolean;
   open_scene: boolean;
   closed_scene: boolean;
-  preprocessed: boolean;
-  trained: boolean;
-  evaluated: boolean;
-  successful: boolean;
-  error: string;
-  raw_data: object;
+  preprocessed?: boolean;
+  trained?: boolean;
+  evaluated?: boolean;
+  successful?: boolean;
+  error?: string;
+  raw_data?: object;
 };
 
 export type DataItemTable = DataItem & {

@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown } from "lucide-react";
-import { DataItemTable } from "@/types";
+import { ArrowUpDown, Edit } from "lucide-react";
+import { DataItem, DataItemRequest, DataItemTable } from "@/types";
 import { formatFileSize } from "@/utils/fileFormatter";
 import { formatDate, formatDuration } from "@/utils/timeFormatter";
-import { TABLE_MAPPING } from "@/constants";
+import { categoryKeys, TABLE_MAPPING } from "@/constants";
+import EditModal from "./EditModal";
+import getFormattedItems from "@/utils/initialFormatter";
 interface DataTableProps {
   data: DataItemTable[];
   setData: (data: DataItemTable[]) => void;
@@ -27,6 +29,37 @@ export default function DataTable({
 }: DataTableProps) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [editingItem, setEditingItem] = useState<DataItemRequest | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleEdit = (item: DataItemTable) => {
+    const defaultCategories = categoryKeys.reduce((acc, key) => {
+      acc[key] = false;
+      return acc;
+    }, {} as { [key: string]: boolean });
+    const { tag_obj, tag_esc, ...rest } = item;
+    const newItem: { [key: string]: any } = { ...rest, ...defaultCategories };
+    if (tag_esc) {
+      tag_esc.forEach((tag) => {
+        newItem[tag] = true;
+      });
+    }
+    if (tag_obj) {
+      tag_obj.forEach((tag) => {
+        newItem[tag] = true;
+      });
+    }
+    setEditingItem(newItem as DataItemRequest);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = (updatedItem: DataItemRequest) => {
+    const updatedData = data.map((item) =>
+      item.id === updatedItem.id ? updatedItem : item
+    );
+    const cleanedData = getFormattedItems(updatedData);
+    setData(cleanedData as DataItemTable[]);
+  };
 
   const handleSort = (column: string) => {
     if (column === sortColumn) {
@@ -102,36 +135,55 @@ export default function DataTable({
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {visibleColumns.map((column) => (
-            <TableHead key={column}>
-              <Button
-                variant="ghost"
-                onClick={() => handleSort(column)}
-                className="pl-0"
-              >
-                {TABLE_MAPPING[column as keyof typeof TABLE_MAPPING]}
-                {sortColumn === column && (
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                )}
-              </Button>
-            </TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((item, index) => (
-          <TableRow key={index}>
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[80px]">Acciones</TableHead>
             {visibleColumns.map((column) => (
-              <TableCell key={column} className="py-4">
-                {renderCellContent(item, column as keyof DataItemTable)}
-              </TableCell>
+              <TableHead key={column}>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort(column)}
+                  className="pl-0"
+                >
+                  {TABLE_MAPPING[column as keyof typeof TABLE_MAPPING]}
+                  {sortColumn === column && (
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  )}
+                </Button>
+              </TableHead>
             ))}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {data.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEdit(item)}
+                  title="Edit"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </TableCell>
+              {visibleColumns.map((column) => (
+                <TableCell key={column} className="py-4">
+                  {renderCellContent(item, column as keyof DataItemTable)}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <EditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        item={editingItem}
+        onSave={handleSave}
+      />
+    </>
   );
 }

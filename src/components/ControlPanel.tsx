@@ -7,9 +7,8 @@ import {
 } from "@/components/ui/select";
 import { MultiSelect } from "./MultiSelect";
 import { metricsKeys } from "@/types";
-import { group } from "console";
 import { TABLE_MAPPING } from "@/constants";
-import ColumnSelector from "./ColumnSelector";
+import { Label } from "@radix-ui/react-label";
 
 interface ControlPanelProps {
   fields: (keyof typeof TABLE_MAPPING)[];
@@ -34,10 +33,8 @@ export default function ControlPanel({
 }: ControlPanelProps) {
   return (
     <div className="flex flex-wrap gap-4 justify-between items-center">
-      <div>
-        <label className="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Agrupar por
-        </label>
+      <div className="space-y-2">
+        <Label className="ml-4 text-sm text-gray-600">Agrupar por</Label>
         <div className="flex flex-wrap gap-4 items-center">
           <div className="min-w-[180px]">
             <Select
@@ -70,12 +67,15 @@ export default function ControlPanel({
           )}
         </div>
       </div>
-      <MultiSelect
-        options={Object.keys(TABLE_MAPPING)}
-        selected={visibleColumns}
-        onChange={(columns) => handleColumnChange(columns)}
-        placeholder="Selecciona las columnas visibles"
-      />
+      <div className="space-y-2 flex flex-col items-end text-sm">
+      <Label className="text-sm text-gray-600">Columnas visibles</Label>
+        <MultiSelect
+          options={Object.keys(TABLE_MAPPING)}
+          selected={visibleColumns}
+          onChange={(columns) => handleColumnChange(columns)}
+          placeholder="Selecciona las columnas visibles"
+        />
+      </div>
     </div>
   );
 }
