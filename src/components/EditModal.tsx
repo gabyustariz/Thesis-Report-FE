@@ -23,16 +23,82 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DataItemRequest, DataItemTable } from "@/types";
-import { DATES_MAPPING, METRIC_MAPPING, METRIC_TABLES, MORE_SCENES_MAPPING, SCENES_MAPPING, TABLE_MAPPING } from "@/constants";
+import {
+  DATES_MAPPING,
+  METRIC_MAPPING,
+  MORE_SCENES_MAPPING,
+  SCENES_MAPPING,
+  TABLE_MAPPING,
+} from "@/constants";
 import { formatDate } from "@/utils/timeFormatter";
 import usePutExperiment from "@/customHooks/usePutExperiments";
-
+import { toast } from "sonner";
+import { Check, X } from "lucide-react";
 interface EditModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: DataItemRequest | null;
   onSave: (updatedItem: DataItemRequest) => void;
 }
+
+const showToast = ({
+  type,
+  title,
+  message,
+  icon,
+}: {
+  type: string;
+  title: string;
+  message: string;
+  icon: React.ReactNode;
+}) => {
+  toast.custom(
+    (id) => (
+      <div
+        className={`flex items-center gap-3 p-4 rounded-lg shadow-sm ${
+          type === "success"
+            ? "bg-green-50 border border-green-200"
+            : "bg-red-50 border border-red-200"
+        }`}
+      >
+        <div
+          className={`flex-shrink-0 p-1 rounded-full ${
+            type === "success" ? "bg-green-100" : "bg-red-100"
+          }`}
+        >
+          {icon}
+        </div>
+        <div>
+          <h3
+            className={`font-medium ${
+              type === "success" ? "text-green-800" : "text-red-800"
+            }`}
+          >
+            {title}
+          </h3>
+          <p
+            className={`text-sm ${
+              type === "success" ? "text-green-700" : "text-red-700"
+            }`}
+          >
+            {message}
+          </p>
+        </div>
+        <button
+          onClick={() => toast.dismiss(id)}
+          className={`ml-auto ${
+            type === "success"
+              ? "text-green-500 hover:text-green-700"
+              : "text-red-500 hover:text-red-700"
+          }`}
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    ),
+    { duration: 4000 }
+  );
+};
 
 export default function EditModal({
   isOpen,
@@ -84,7 +150,27 @@ export default function EditModal({
         ...item,
         ...formData,
       };
-      updatedData({ id, data });
+      updatedData(
+        { id, data },
+        {
+          onSuccess: () => {
+            showToast({
+              type: "success",
+              title: "Actualizado éxitosamente",
+              message: `La información del experimento ${data.title} ha sido actualizada`,
+              icon: <Check className="h-5 w-5 text-green-600" />,
+            });
+          },
+          onError: () => {
+            showToast({
+              type: "error",
+              title: "Error al actualizar",
+              message: `Hubo un error al actualizar la información del experimento ${data.title}`,
+              icon: <X className="h-5 w-5 text-red-600" />,
+            });
+          },
+        }
+      );
       onSave(data);
     }
     onClose();

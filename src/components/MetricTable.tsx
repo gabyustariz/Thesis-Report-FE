@@ -28,8 +28,6 @@ export default function CategoryMetricsTable({
 }: CategoryMetricsTableProps) {
   const [activeMetric, setActiveMetric] = useState(metrics[0]);
 
-  console.log(`ke`, data);
-
   const models = Array.from(new Set(data.map((item) => item[mainFilter])));
   const calculateAverage = (
     model: string,
@@ -83,7 +81,6 @@ export default function CategoryMetricsTable({
       const categoryData = categories.map((category) => {
         const models = Object.entries(dataTable).reduce(
           (acc: { [key: string]: any }, [mainFilter, value]) => {
-            console.log(`epale2`, dataTable, value);
             acc[mainFilter] = dataTable[mainFilter][metric][category];
             return acc;
           },
@@ -100,8 +97,6 @@ export default function CategoryMetricsTable({
       };
     }, {});
   }, [dataTable]);
-
-  console.log(dataChart);
 
   return (
     <>

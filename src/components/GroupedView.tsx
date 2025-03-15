@@ -108,7 +108,6 @@ export default function GroupedView({
         result.min[agg] = Math.min(...values);
         result.max[agg] = Math.max(...values);
       });
-      console.log(result);
       return result;
     });
   }, [data, groupBy, aggregations]);
