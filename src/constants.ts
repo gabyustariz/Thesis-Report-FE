@@ -94,26 +94,42 @@ export const METRIC_MAPPING = {
   frame_size_avg_bytes: "Tamaño promedio de frames (B)",
 };
 
-export const TABLE_MAPPING = {
-  ...METRIC_MAPPING,
-  id: "Id",
-  title: "Título de experimento",
-  dataset: "Dataset",
-  type: "Tipo de formato",
-  model: "Modelo de IA",
-  preprocessor: "Preprocesador",
-  scene_type: "Id de escena",
-  virtual_scene: "Escena virtual",
-  real_scene: "Escena real",
+export const DATES_MAPPING = {
   date_added: "Fecha de creación",
   date_updated: "Fecha de actualización",
+};
+
+export const MORE_SCENES_MAPPING = {
+  virtual_scene: "Escena virtual",
+  real_scene: "Escena real",
+};
+
+export const SCENES_MAPPING = {
   opaque_obj: "Objeto opaco",
   transparent_obj: "Objeto transparente",
   complex_obj: "Objeto complejo",
   open_scene: "Escena abierta",
   closed_scene: "Escena cerrada",
+};
+
+export const TABLE_VISIBLE_MAPPING = {
+  id: "ID",
+  title: "Título de experimento",
+  scene_type: "ID de escena",
+  dataset: "Dataset",
+  model: "Modelo de IA",
+  preprocessor: "Preprocesador",
   tag_obj: "Tags de objetos",
   tag_esc: "Tags de escenas",
+  type: "Tipo de formato",
+  ...METRIC_MAPPING,
+  ...MORE_SCENES_MAPPING,
+  ...DATES_MAPPING,
+};
+
+export const TABLE_MAPPING = {
+  ...TABLE_VISIBLE_MAPPING,
+  ...SCENES_MAPPING,
 };
 
 export const METRIC_TABLES = [

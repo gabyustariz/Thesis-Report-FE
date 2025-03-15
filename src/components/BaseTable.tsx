@@ -42,14 +42,16 @@ export default function BaseTable({
         />
       </div>
       <h2 className="text-xl font-semibold mb-4 pt-8">Tabla Principal</h2>
-      <div className="bg-white rounded-lg shadow-md p-4 mt-4">
+      <div className="flex flex-col grow justify-between gap-2">
         {groupBy ? (
-          <GroupedView
-            data={data}
-            groupBy={groupBy}
-            aggregations={aggregations}
-            visibleColumns={visibleColumns}
-          />
+          <div className="bg-white rounded-lg shadow-md p-4 mt-4">
+            <GroupedView
+              data={data}
+              groupBy={groupBy}
+              aggregations={aggregations}
+              visibleColumns={visibleColumns}
+            />
+          </div>
         ) : (
           <DataTable
             data={data}

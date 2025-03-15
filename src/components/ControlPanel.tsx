@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/select";
 import { MultiSelect } from "./MultiSelect";
 import { metricsKeys } from "@/types";
-import { TABLE_MAPPING } from "@/constants";
+import { TABLE_MAPPING, TABLE_VISIBLE_MAPPING } from "@/constants";
 import { Label } from "@radix-ui/react-label";
 
 interface ControlPanelProps {
@@ -70,7 +70,7 @@ export default function ControlPanel({
       <div className="space-y-2 flex flex-col items-end text-sm">
       <Label className="text-sm text-gray-600">Columnas visibles</Label>
         <MultiSelect
-          options={Object.keys(TABLE_MAPPING)}
+          options={Object.keys(TABLE_VISIBLE_MAPPING)}
           selected={visibleColumns}
           onChange={(columns) => handleColumnChange(columns)}
           placeholder="Selecciona las columnas visibles"

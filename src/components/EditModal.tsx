@@ -23,9 +23,9 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DataItemRequest, DataItemTable } from "@/types";
-import { TABLE_MAPPING } from "@/constants";
+import { DATES_MAPPING, METRIC_MAPPING, METRIC_TABLES, MORE_SCENES_MAPPING, SCENES_MAPPING, TABLE_MAPPING } from "@/constants";
 import { formatDate } from "@/utils/timeFormatter";
-import usePutExperiment from "@/hooks/usePutExperiments";
+import usePutExperiment from "@/customHooks/usePutExperiments";
 
 interface EditModalProps {
   isOpen: boolean;
@@ -48,10 +48,6 @@ export default function EditModal({
       setFormData({ ...item });
     }
   }, [item]);
-
-  useEffect(() => {
-    console.log(`formData`, formData);
-  }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -98,36 +94,10 @@ export default function EditModal({
 
   // Group fields by type for better organization
   const textFields = ["scene_type", "title", "dataset"];
-  const booleanFields = [
-    "opaque_obj",
-    "transparent_obj",
-    "complex_obj",
-    "open_scene",
-    "closed_scene",
-  ];
-  const moreBooleanFields = ["virtual_scene", "real_scene"];
-  const numericFields = [
-    "frames_training_total",
-    "frames_total",
-    "frame_size_total_bytes",
-    "frame_size_avg_bytes",
-    "psnr",
-    "psnr_std",
-    "ssim",
-    "ssim_std",
-    "lpips",
-    "lpips_std",
-    "frames_match_ratio",
-    "num_rays_per_sec",
-    "num_rays_per_sec_std",
-    "fps",
-    "fps_std",
-    "preprocesing_time_s",
-    "training_time_s",
-    "evaluation_time_s",
-  ];
-
-  const datesFields = ["date_added", "date_updated"];
+  const booleanFields = Object.keys(SCENES_MAPPING);
+  const moreBooleanFields = Object.keys(MORE_SCENES_MAPPING);
+  const numericFields = Object.keys(METRIC_MAPPING);
+  const datesFields = Object.keys(DATES_MAPPING);
 
   const typeOptions = ["image", "video"];
   const modelOptions = ["NeRF", "Gaussian"];

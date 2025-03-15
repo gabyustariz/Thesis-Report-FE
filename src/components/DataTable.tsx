@@ -10,12 +10,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, Edit } from "lucide-react";
-import { DataItem, DataItemRequest, DataItemTable } from "@/types";
+import { DataItemRequest, DataItemTable } from "@/types";
 import { formatFileSize } from "@/utils/fileFormatter";
 import { formatDate, formatDuration } from "@/utils/timeFormatter";
 import { categoryKeys, TABLE_MAPPING } from "@/constants";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import EditModal from "./EditModal";
 import getFormattedItems from "@/utils/initialFormatter";
+import DataTablePagination from "./DataTablePagination";
 interface DataTableProps {
   data: DataItemTable[];
   setData: (data: DataItemTable[]) => void;
@@ -31,6 +48,16 @@ export default function DataTable({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [editingItem, setEditingItem] = useState<DataItemRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, data.length);
+  const currentData = data.slice(startIndex, endIndex);
 
   const handleEdit = (item: DataItemTable) => {
     const defaultCategories = categoryKeys.reduce((acc, key) => {
@@ -134,55 +161,91 @@ export default function DataTable({
     return String(item[column]);
   };
 
+  const numColumnsFixed = 3;
+
+  const getStyle = (index: number, isHeader?: boolean) => {
+    if (index >= numColumnsFixed) return {};
+    const ind = isHeader ? 48 : 20;
+    return {
+      zIndex: ind - index,
+      left: index === 1 ? 72 : index === 2 ? 118 : 0,
+    };
+  };
+
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[80px]">Acciones</TableHead>
-            {visibleColumns.map((column) => (
-              <TableHead key={column}>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort(column)}
-                  className="pl-0"
-                >
-                  {TABLE_MAPPING[column as keyof typeof TABLE_MAPPING]}
-                  {sortColumn === column && (
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  )}
-                </Button>
+      <div className="bg-white rounded-lg shadow-md p-4">
+        <Table classNameWrapper="max-h-[495px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead
+                className="sticky-header w-[80px]"
+                style={{ zIndex: 48, left: 0 }}
+              >
+                Acciones
               </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((item, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleEdit(item)}
-                  title="Edit"
+              {visibleColumns.map((column, index) => (
+                <TableHead
+                  key={column}
+                  className={"sticky-header"}
+                  style={getStyle(index + 1, true)}
                 >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </TableCell>
-              {visibleColumns.map((column) => (
-                <TableCell key={column} className="py-4">
-                  {renderCellContent(item, column as keyof DataItemTable)}
-                </TableCell>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort(column)}
+                    className="pl-0"
+                  >
+                    {TABLE_MAPPING[column as keyof typeof TABLE_MAPPING]}
+                    {sortColumn === column && (
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    )}
+                  </Button>
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {currentData.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell
+                  className="sticky-column w-[80px]"
+                  style={getStyle(0)}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(item)}
+                    title="Edit"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+                {visibleColumns.map((column, ind) => (
+                  <TableCell
+                    key={column}
+                    className={ind + 1 < numColumnsFixed ? "sticky-column" : ""}
+                    style={getStyle(ind + 1)}
+                  >
+                    {renderCellContent(item, column as keyof DataItemTable)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
       <EditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         item={editingItem}
         onSave={handleSave}
+      />
+      <DataTablePagination
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+        totalItems={data.length}
       />
     </>
   );

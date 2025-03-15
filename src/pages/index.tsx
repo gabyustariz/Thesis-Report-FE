@@ -16,6 +16,8 @@ import {
   metricsKeys,
   OBJECT_MAPPING,
   SCENE_MAPPING,
+  TABLE_MAPPING,
+  TABLE_VISIBLE_MAPPING,
 } from "@/constants";
 import CategoryMetricsTable from "@/components/MetricTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,7 +25,7 @@ import BaseTable from "@/components/BaseTable";
 import { Loader2Icon, LoaderIcon } from "lucide-react";
 import noDataFound from "@/assets/images/nodata.png";
 import Image from "next/image";
-import useGetExperiments from "@/hooks/useGetExperiments";
+import useGetExperiments from "@/customHooks/useGetExperiments";
 import getFormattedItems from "@/utils/initialFormatter";
 
 export default function Home() {
@@ -38,7 +40,7 @@ export default function Home() {
     if (!items || !items.length) return;
     const newItems = getFormattedItems(items);
     setData(newItems as DataItemTable[]);
-    setVisibleColumns(Object.keys(newItems[0]));
+    setVisibleColumns(Object.keys(TABLE_VISIBLE_MAPPING));
   }, [items]);
 
   const handleColumnChange = (selectedColumns: string[]) => {
@@ -80,9 +82,10 @@ export default function Home() {
 
   return (
     <>
-      <main className="container mx-auto p-4 py-10 space-y-6">
+      <main className="container flex flex-col mx-auto my-10 space-y-6 h-[calc(100vh-5rem)]">
         <h1 className="text-2xl font-bold">Aplicación de Análisis</h1>
-        <Tabs defaultValue="main-view" className="w-full">
+        <div className="flex flex-col grow">
+        <Tabs defaultValue="main-view" className="w-full flex flex-col grow">
           <TabsList className="grid w-full grid-cols-3 gap-2">
             <TabsTrigger value="main-view">Tabla principal</TabsTrigger>
             <TabsTrigger value="preprocessor">
@@ -92,7 +95,7 @@ export default function Home() {
               Tabla de Métricas de Modelos de IA
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="main-view">
+          <TabsContent value="main-view" className="flex flex-col grow">
             <BaseTable
               data={data}
               setData={setData}
@@ -118,6 +121,7 @@ export default function Home() {
             </TabsContent>
           ))}
         </Tabs>
+        </div>
       </main>
     </>
   );

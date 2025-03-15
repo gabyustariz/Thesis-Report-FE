@@ -19,7 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { TABLE_MAPPING } from "@/constants";
-
 interface MultiSelectProps {
   options: string[];
   selected: string[];
